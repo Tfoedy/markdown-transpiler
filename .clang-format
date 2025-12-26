@@ -1,0 +1,6 @@
+---
+BasedOnStyle: LLVM
+AllowShortFunctionsOnASingleLine: None
+BinPackArguments: false
+PackConstructorInitializers: Never
+
