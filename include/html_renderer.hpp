@@ -12,7 +12,8 @@ namespace mt {
 
 class HtmlRenderer : public Visitor {
 public:
-  explicit HtmlRenderer(std::string title, bool use_default_style = true);
+  explicit HtmlRenderer(std::string title, bool use_default_style = true,
+                        bool only_body = false);
 
   std::string get_output() const;
   void clear();
@@ -38,6 +39,7 @@ private:
   std::stringstream m_html_body;
   std::string m_title;
   bool m_use_default_style;
+  bool m_only_body;
 };
 
 } // namespace mt

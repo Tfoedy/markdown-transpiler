@@ -34,18 +34,23 @@ static const std::string default_optional_style =
     "  padding: 0; "
     "}\n";
 
-HtmlRenderer::HtmlRenderer(std::string title, bool use_default_style)
+HtmlRenderer::HtmlRenderer(std::string title, bool use_default_style,
+                           bool only_body)
     : m_title(std::move(title)),
-      m_use_default_style(use_default_style) {
+      m_use_default_style(use_default_style),
+      m_only_body(only_body) {
 }
 
 std::string HtmlRenderer::get_output() const {
   std::stringstream html_output;
 
-  html_output << "<!DOCTYPE html>\n<html>\n<head>\n<meta "
-                 "charset=\"utf-8\">\n<title>";
-  html_output << m_title;
-  html_output << "</title>\n";
+  if (!m_only_body) {
+
+    html_output << "<!DOCTYPE html>\n<html>\n<head>\n<meta "
+                   "charset=\"utf-8\">\n<title>";
+    html_output << m_title;
+    html_output << "</title>\n";
+  }
 
   if (m_use_default_style) {
     html_output << "<style>\n";
@@ -53,9 +58,15 @@ std::string HtmlRenderer::get_output() const {
     html_output << "</style>\n";
   }
 
-  html_output << "</head>\n<body>\n";
+  if (!m_only_body)
+    html_output << "</head>\n";
+
+  html_output << "<body>\n";
   html_output << m_html_body.str();
-  html_output << "\n</body>\n</html>";
+  html_output << "\n</body>\n";
+
+  if (!m_only_body)
+    html_output << "</html>";
 
   return html_output.str();
 }
@@ -64,6 +75,8 @@ void HtmlRenderer::clear() {
   m_html_body.clear();
 }
 
+// Prevents injecting HTML code/tags from
+// the Markdown file
 std::string HtmlRenderer::escape_html(const std::string_view data) {
   std::string buffer;
   buffer.reserve(data.size());
@@ -92,6 +105,7 @@ std::string HtmlRenderer::escape_html(const std::string_view data) {
   return buffer;
 }
 
+// actual imp
 void HtmlRenderer::visit(const Document &node) {
   for (const auto &child : node.children)
     child->accept(*this);

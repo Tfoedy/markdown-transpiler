@@ -13,6 +13,6 @@ public:
 private:
   static bool transpile(const std::string &input_path,
                         const std::string &output_path,
-                        bool use_default_styling);
+                        bool use_default_styling, bool only_body);
 };
 } // namespace mt

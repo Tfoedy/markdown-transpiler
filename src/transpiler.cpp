@@ -13,6 +13,7 @@ namespace mt {
 
 int Transpiler::run(int argc, char *argv[]) {
   bool use_default_styling = true;
+  bool only_body = false;
   std::string input_filename;
   std::string output_filename;
 
@@ -21,6 +22,11 @@ int Transpiler::run(int argc, char *argv[]) {
     std::string arg = argv[i];
     if (arg == "--no-styling") {
       use_default_styling = false;
+    } else if (arg == "--only-body") {
+      use_default_styling = false;
+      only_body = true;
+    } else if (arg.substr(0, 2) == "--") {
+      std::cout << "Unknown command: " << arg << '\n';
     } else if (input_filename.empty()) {
       input_filename = arg;
     } else if (output_filename.empty()) {
@@ -29,12 +35,14 @@ int Transpiler::run(int argc, char *argv[]) {
   }
 
   if (input_filename.empty()) {
-    std::cout << "Usage: " << argv[0]
-              << " <input_file> [output_file] [--no-styling]\n";
+    std::cout << "Usage: " << argv[0] << " [--no-styling] [--only-body] "
+              << "<input_file> [output_file]\n";
     return 1;
   }
 
   // Getting the filename
+  // if .html is missing from the filename
+  // add it
   if (output_filename.empty()) {
     std::filesystem::path input_path(input_filename);
     output_filename = input_path.stem().string() + ".html";
@@ -46,13 +54,15 @@ int Transpiler::run(int argc, char *argv[]) {
     }
   }
 
-  return transpile(input_filename, output_filename, use_default_styling) ? 0
-                                                                         : 1;
+  return transpile(
+             input_filename, output_filename, use_default_styling, only_body)
+             ? 0
+             : 1;
 }
 
 bool Transpiler::transpile(const std::string &input_path,
                            const std::string &output_path,
-                           bool use_custom_style) {
+                           bool use_custom_style, bool only_body) {
   std::ifstream file(input_path);
   if (!file.is_open()) {
     std::cerr << "Error: Could not open input file: " << input_path << "\n";
@@ -84,7 +94,7 @@ bool Transpiler::transpile(const std::string &input_path,
   std::string doc_title = p.stem().string();
 
   // 3. Rendering
-  HtmlRenderer renderer(doc_title, use_custom_style);
+  HtmlRenderer renderer(doc_title, use_custom_style, only_body);
   document->accept(renderer);
   std::string html_content = renderer.get_output();
 
@@ -98,10 +108,10 @@ bool Transpiler::transpile(const std::string &input_path,
   out_file << html_content;
   std::cout << "Successfully transpiled '" << input_path << "' to '"
             << output_path << "'.\n";
-
-  if (!use_custom_style) {
+  if (only_body)
+    std::cout << "(Only body)\n";
+  else if (!use_custom_style)
     std::cout << "(Default styling disabled)\n";
-  }
 
   return true;
 }
