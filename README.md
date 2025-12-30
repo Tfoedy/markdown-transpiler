@@ -70,4 +70,4 @@ which will compile the binary `markdowntranspiler` in the `build` directory.
 
 This project uses the [`MIT license`](LICENSE).
 
-Done as the _final_ project for the 1st semester at my University.
+Done as the final project for the 1st semester at my University.
